@@ -74,9 +74,21 @@ class DashboardController {
 
         try {
 
+            const page = Number.parseInt(req.query.page, 10) || 1;
+            const limit = Number.parseInt(req.query.limit, 10) || 5;
+
             const data =
                 await DashboardService.getOverdueTasks(
-                    req.user.id
+                    req.user.id,
+                    {
+                        page: Math.max(1, page),
+                        limit: Math.max(1, limit),
+                        status: req.query.status || "",
+                        priority: req.query.priority || "",
+                        assignee: req.query.assignee || "",
+                        title: req.query.title || "",
+                        endDate: req.query.endDate || ""
+                    }
                 );
 
             return ResponseHandler.success(

@@ -6,131 +6,67 @@ import {
 
 import { Op } from "sequelize";
 
-
-
-
-
 class DashboardService {
+    buildDateRange(dateValue) {
+        if (!dateValue) return null;
 
+        const start = new Date(dateValue);
+        if (Number.isNaN(start.getTime())) return null;
 
+        const end = new Date(start);
+        end.setDate(end.getDate() + 1);
 
-
+        return {
+            [Op.gte]: start,
+            [Op.lt]: end
+        };
+    }
 
     async getSummary(userId) {
+        const memberships = await ProjectMember.findAll({
+            where: { userId }
+        });
 
-        /*
-        |--------------------------------------------------------------------------
-        | GET USER PROJECTS
-        |--------------------------------------------------------------------------
-        */
+        const projectIds = memberships.map((member) => member.projectId);
 
-        const memberships =
-            await ProjectMember.findAll({
+        const totalTasks = await Task.count({
+            where: {
+                projectId: projectIds
+            }
+        });
 
-                where: { userId }
-            });
+        const todo = await Task.count({
+            where: {
+                projectId: projectIds,
+                status: "TODO"
+            }
+        });
 
-        const projectIds =
-            memberships.map(
-                member => member.projectId
-            );
+        const inProgress = await Task.count({
+            where: {
+                projectId: projectIds,
+                status: "IN_PROGRESS"
+            }
+        });
 
+        const done = await Task.count({
+            where: {
+                projectId: projectIds,
+                status: "DONE"
+            }
+        });
 
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL TASKS
-        |--------------------------------------------------------------------------
-        */
-
-        const totalTasks =
-            await Task.count({
-
-                where: {
-                    projectId: projectIds
+        const overdue = await Task.count({
+            where: {
+                projectId: projectIds,
+                dueDate: {
+                    [Op.lt]: new Date()
+                },
+                status: {
+                    [Op.ne]: "DONE"
                 }
-            });
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TASK STATUS COUNTS
-        |--------------------------------------------------------------------------
-        */
-
-        const todo =
-            await Task.count({
-
-                where: {
-                    projectId: projectIds,
-                    status: "TODO"
-                }
-            });
-
-
-
-
-
-        const inProgress =
-            await Task.count({
-
-                where: {
-                    projectId: projectIds,
-                    status: "IN_PROGRESS"
-                }
-            });
-
-
-
-
-
-        const done =
-            await Task.count({
-
-                where: {
-                    projectId: projectIds,
-                    status: "DONE"
-                }
-            });
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | OVERDUE TASKS
-        |--------------------------------------------------------------------------
-        */
-
-        const overdue =
-            await Task.count({
-
-                where: {
-
-                    projectId: projectIds,
-
-                    dueDate: {
-                        [Op.lt]: new Date()
-                    },
-
-                    status: {
-                        [Op.ne]: "DONE"
-                    }
-                }
-            });
-
-
-
-
+            }
+        });
 
         return {
             totalTasks,
@@ -141,79 +77,37 @@ class DashboardService {
         };
     }
 
-
-
-
-
-
     async getTasksPerUser(userId) {
+        const memberships = await ProjectMember.findAll({
+            where: { userId }
+        });
 
-        const memberships =
-            await ProjectMember.findAll({
+        const projectIds = memberships.map((member) => member.projectId);
 
-                where: { userId }
-            });
-
-        const projectIds =
-            memberships.map(
-                member => member.projectId
-            );
-
-
-
-
-
-
-        const tasks =
-            await Task.findAll({
-
-                where: {
-                    projectId: projectIds
-                },
-
-                include: [
-                    {
-                        model: User,
-                        as: "assignee",
-                        attributes: [
-                            "id",
-                            "name",
-                            "email"
-                        ]
-                    }
-                ]
-            });
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | GROUP TASKS
-        |--------------------------------------------------------------------------
-        */
+        const tasks = await Task.findAll({
+            where: {
+                projectId: projectIds
+            },
+            include: [
+                {
+                    model: User,
+                    as: "assignee",
+                    attributes: ["id", "name", "email"]
+                }
+            ]
+        });
 
         const grouped = {};
 
-        tasks.forEach(task => {
-
-            const user =
-                task.assignee;
-
+        tasks.forEach((task) => {
+            const user = task.assignee;
             if (!user) return;
 
             if (!grouped[user.id]) {
-
                 grouped[user.id] = {
-
                     userId: user.id,
-
                     name: user.name,
-
                     email: user.email,
-
                     totalTasks: 0
                 };
             }
@@ -221,70 +115,94 @@ class DashboardService {
             grouped[user.id].totalTasks++;
         });
 
-
-
-
-
         return Object.values(grouped);
     }
 
+    async getOverdueTasks(userId, options = {}) {
+        const {
+            page = 1,
+            limit = 5,
+            status = "",
+            priority = "",
+            assignee = "",
+            title = "",
+            endDate = ""
+        } = options;
 
+        const memberships = await ProjectMember.findAll({
+            where: { userId }
+        });
 
+        const projectIds = memberships.map((member) => member.projectId);
 
+        const whereClause = {
+            projectId: projectIds,
+            dueDate: {
+                [Op.lt]: new Date()
+            },
+            status: {
+                [Op.ne]: "DONE"
+            }
+        };
 
+        if (status) {
+            whereClause.status = status;
+        }
 
-    async getOverdueTasks(userId) {
+        if (priority) {
+            whereClause.priority = priority;
+        }
 
-        const memberships =
-            await ProjectMember.findAll({
+        if (title && title.trim()) {
+            whereClause.title = {
+                [Op.iLike]: `%${title.trim()}%`
+            };
+        }
 
-                where: { userId }
-            });
+        const dueDateRange = this.buildDateRange(endDate);
+        if (dueDateRange) {
+            whereClause.dueDate = dueDateRange;
+        }
 
-        const projectIds =
-            memberships.map(
-                member => member.projectId
-            );
+        const assigneeInclude = {
+            model: User,
+            as: "assignee",
+            attributes: ["id", "name", "email"]
+        };
 
-
-
-
-
-
-        const overdueTasks =
-            await Task.findAll({
-
-                where: {
-
-                    projectId: projectIds,
-
-                    dueDate: {
-                        [Op.lt]: new Date()
-                    },
-
-                    status: {
-                        [Op.ne]: "DONE"
-                    }
-                },
-
-                include: [
-                    {
-                        model: User,
-                        as: "assignee",
-                        attributes: [
-                            "id",
-                            "name",
-                            "email"
-                        ]
-                    }
+        if (assignee && assignee.trim()) {
+            const assigneeTerm = assignee.trim();
+            assigneeInclude.where = {
+                [Op.or]: [
+                    { name: { [Op.iLike]: `%${assigneeTerm}%` } },
+                    { email: { [Op.iLike]: `%${assigneeTerm}%` } }
                 ]
-            });
+            };
+            assigneeInclude.required = true;
+        }
 
+        const offset = (page - 1) * limit;
 
+        const { rows, count } = await Task.findAndCountAll({
+            where: whereClause,
+            include: [assigneeInclude],
+            order: [["dueDate", "ASC"]],
+            limit,
+            offset,
+            distinct: true
+        });
 
+        const totalPages = count === 0 ? 1 : Math.ceil(count / limit);
 
-
-        return overdueTasks;
+        return {
+            tasks: rows,
+            pagination: {
+                page,
+                limit,
+                total: count,
+                totalPages
+            }
+        };
     }
 }
 
