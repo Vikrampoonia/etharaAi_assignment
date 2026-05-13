@@ -25,6 +25,12 @@ router.get(
     ProjectController.getMembers
 );
 
+router.get(
+    "/:projectId/members/search",
+    verifyJWT,
+    ProjectController.searchMembers
+);
+
 router.post(
     "/",
     verifyJWT,

@@ -15,6 +15,16 @@ export const projectService = {
   removeMembers
 };
 
+// search members by query (name or email) with limit
+export async function searchMembers(projectId, q = "", limit = 10) {
+  const params = new URLSearchParams({
+    q: String(q || ""),
+    limit: String(limit)
+  }).toString();
+
+  return fetchWrapper(`${BASE_URL}/${projectId}/members/search?${params}`);
+}
+
 async function getProjects() {
   return fetchWrapper(BASE_URL);
 }

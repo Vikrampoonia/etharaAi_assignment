@@ -245,6 +245,20 @@ class ProjectController {
             );
         }
     }
+
+    async searchMembers(req, res) {
+        try {
+            const { projectId } = req.params;
+            const q = req.query.q || "";
+            const limit = Number.parseInt(req.query.limit, 10) || 10;
+
+            const members = await ProjectService.searchMembers({ projectId, q, limit });
+
+            return ResponseHandler.success(res, "Members fetched successfully", { members });
+        } catch (error) {
+            return ResponseHandler.error(res, error.message);
+        }
+    }
 }
 
 export default new ProjectController;

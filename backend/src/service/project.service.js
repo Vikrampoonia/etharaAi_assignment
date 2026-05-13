@@ -116,6 +116,33 @@ class ProjectService {
         };
     }
 
+    async searchMembers({ projectId, q = "", limit = 10 }) {
+        const whereClause = { projectId };
+
+        const members = await ProjectMember.findAll({
+            where: whereClause,
+            include: [
+                {
+                    model: User,
+                    attributes: ["id", "name", "email"]
+                }
+            ],
+            limit,
+            order: [["createdAt", "DESC"]]
+        });
+
+        if (q && q.trim()) {
+            const ql = q.toLowerCase();
+            return members.filter((m) => {
+                const name = (m.User?.name || "").toLowerCase();
+                const email = (m.User?.email || "").toLowerCase();
+                return name.includes(ql) || email.includes(ql);
+            }).slice(0, limit);
+        }
+
+        return members;
+    }
+
 
     async createProject({
         name,

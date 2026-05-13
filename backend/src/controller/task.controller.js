@@ -64,10 +64,21 @@ class TaskController {
 
             const { projectId } = req.params;
 
-            const data =
-                await TaskService.getTasks(
-                    projectId
-                );
+            const page = parseInt(req.query.page, 10) || 1;
+            const limit = parseInt(req.query.limit, 10) || 10;
+
+            const filters = {
+                status: req.query.status,
+                priority: req.query.priority,
+                assignedTo: req.query.assignedTo,
+                title: req.query.title
+            };
+
+            const data = await TaskService.getTasks(projectId, {
+                page,
+                limit,
+                ...filters
+            });
 
             return ResponseHandler.success(
                 res,
@@ -162,7 +173,7 @@ class TaskController {
 
             const { taskId } = req.params;
 
-            await TaskService.deleteTask(taskId);
+            await TaskService.deleteTask(taskId, req.user);
 
             return ResponseHandler.success(
                 res,
