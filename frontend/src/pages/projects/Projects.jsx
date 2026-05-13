@@ -23,14 +23,7 @@ const Projects = () => {
       const response = await projectService.getProjects();
       const apiData = response?.data || response?.projects || [];
 
-      // Backend returns ProjectMember rows with nested Project.
-      const normalizedProjects = Array.isArray(apiData)
-        ? apiData
-          .map((item) => (item?.Project ? item.Project : item))
-          .filter(Boolean)
-        : [];
-
-      setProjects(normalizedProjects);
+      setProjects(Array.isArray(apiData) ? apiData : []);
     } catch (error) {
       console.error("Failed to fetch projects:", error);
     } finally {
@@ -96,6 +89,8 @@ const Projects = () => {
               <ProjectCard
                 key={project.id}
                 project={project}
+                canDelete={project.isCurrentUserAdmin}
+                onDeleted={fetchProjects}
               />
             ))}
           </div>

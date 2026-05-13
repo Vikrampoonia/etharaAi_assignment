@@ -1,6 +1,7 @@
 import {
     Project,
     ProjectMember,
+    Task,
     User
 } from "../modals/index.js";
 import { Op } from "sequelize";
@@ -191,21 +192,48 @@ class ProjectService {
 
 
     async getProjects(userId) {
-        const projects =
-            await ProjectMember.findAll({
+        const memberships = await ProjectMember.findAll({
+            where: {
+                userId
+            },
+            include: [
+                {
+                    model: Project
+                }
+            ],
+            order: [["createdAt", "DESC"]]
+        });
 
-                where: {
-                    userId
-                },
+        const projects = await Promise.all(
+            memberships.map(async (membership) => {
+                const project = membership.Project;
 
-                include: [
-                    {
-                        model: Project
-                    }
-                ]
-            });
+                if (!project) return null;
 
-        return projects;
+                const [membersCount, tasksCount] = await Promise.all([
+                    ProjectMember.count({
+                        where: {
+                            projectId: project.id
+                        }
+                    }),
+                    Task.count({
+                        where: {
+                            projectId: project.id
+                        }
+                    })
+                ]);
+
+                return {
+                    ...project.toJSON(),
+                    membersCount,
+                    tasksCount,
+                    role: membership.role,
+                    isCurrentUserAdmin: membership.role === "ADMIN"
+                };
+            })
+        );
+
+        return projects.filter(Boolean);
     }
 
     async getSingleProject(projectId) {
@@ -237,12 +265,22 @@ class ProjectService {
     }
 
 
-    async deleteProject(projectId) {
-        const project =
-            await Project.findByPk(projectId);
+    async deleteProject(projectId, userId) {
+        const project = await Project.findByPk(projectId);
 
         if (!project) {
             throw new Error("Project not found");
+        }
+
+        const membership = await ProjectMember.findOne({
+            where: {
+                projectId,
+                userId
+            }
+        });
+
+        if (!membership || membership.role !== "ADMIN") {
+            throw new Error("Only project admin can delete this project");
         }
 
         await project.destroy();

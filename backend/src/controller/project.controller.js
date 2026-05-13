@@ -142,7 +142,8 @@ class ProjectController {
             const { projectId } = req.params;
 
             await ProjectService.deleteProject(
-                projectId
+                projectId,
+                req.user.id
             );
 
             return ResponseHandler.success(

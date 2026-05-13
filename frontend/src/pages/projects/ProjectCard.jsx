@@ -1,7 +1,29 @@
 import { useNavigate } from "react-router-dom";
+import { projectService } from "../../services/project.service";
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, canDelete = false, onDeleted }) => {
   const navigate = useNavigate();
+
+  async function handleDeleteProject(event) {
+    event.stopPropagation();
+
+    const confirmed = window.confirm(
+      `Delete project \"${project.name}\"? This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await projectService.deleteProject(project.id);
+
+      if (onDeleted) {
+        onDeleted();
+      }
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+      alert(error.message || "Failed to delete project");
+    }
+  }
 
   return (
     <div className="project-card">
@@ -32,16 +54,40 @@ const ProjectCard = ({ project }) => {
         </p>
       </div>
 
-      <button
-        className="view-btn"
-        onClick={() =>
-          navigate(`/projects/${project.id}`)
-        }
-      >
-        Open Project
-      </button>
+      <div style={actionRowStyle}>
+        {canDelete && (
+          <button
+            className="view-btn"
+            style={deleteButtonStyle}
+            onClick={handleDeleteProject}
+          >
+            Delete Project
+          </button>
+        )}
+
+        <button
+          className="view-btn"
+          onClick={() => navigate(`/projects/${project.id}`)}
+        >
+          Open Project
+        </button>
+      </div>
     </div>
   );
 };
 
 export default ProjectCard;
+
+const actionRowStyle = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+  justifyContent: "flex-end",
+  alignItems: "center"
+};
+
+const deleteButtonStyle = {
+  background: "linear-gradient(135deg, #ef4444, #dc2626)",
+  border: "1px solid #b91c1c",
+  color: "#fff"
+};
