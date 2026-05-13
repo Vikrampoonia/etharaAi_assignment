@@ -31,10 +31,11 @@ const CreateProjectModal = ({
       setLoading(true);
       setError("");
 
-      await projectService.createProject(formData);
+      const response = await projectService.createProject(formData);
 
-      onProjectCreated();
-      onClose();
+      onProjectCreated(
+        response?.message || "Project created successfully"
+      );
 
     } catch (error) {
       console.error(error);

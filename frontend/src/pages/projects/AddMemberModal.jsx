@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { projectService }
-from "../../services/project.service";
+  from "../../services/project.service";
 
 const AddMemberModal = ({
   projectId,
@@ -27,13 +27,14 @@ const AddMemberModal = ({
       setLoading(true);
       setError("");
 
-      await projectService.addMember(
+      const response = await projectService.addMember(
         projectId,
         { email }
       );
 
-      onMemberAdded();
-      onClose();
+      onMemberAdded(
+        response?.message || "Member added successfully"
+      );
 
     } catch (error) {
       console.error(error);

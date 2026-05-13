@@ -9,7 +9,7 @@ export const signupUser = async (
 ) => {
 
     return request(
-        "/api/auth/signup",
+        "/auth/signup",
         {
             method: "POST",
 
@@ -27,7 +27,7 @@ export const loginUser = async (
 ) => {
 
     return request(
-        "/api/auth/login",
+        "/auth/login",
         {
             method: "POST",
 

@@ -7,7 +7,9 @@ const MainLayout = ({ children }) => {
 
         <div
             style={{
-                display: "flex"
+                display: "flex",
+                backgroundColor: "#f8f9fa",
+                minHeight: "100vh"
             }}
         >
 
@@ -15,8 +17,8 @@ const MainLayout = ({ children }) => {
             <div
                 style={{
                     flex: 1,
-                    background: "#f9fafb",
-                    minHeight: "100vh"
+                    display: "flex",
+                    flexDirection: "column"
                 }}
             >
 
@@ -24,12 +26,14 @@ const MainLayout = ({ children }) => {
 
                 <div
                     style={{
-                        padding: "20px"
+                        flex: 1,
+                        padding: "24px",
+                        overflowY: "auto"
                     }}
                 >
                     {children}
                 </div>
-             </div>
+            </div>
 
         </div>
     );

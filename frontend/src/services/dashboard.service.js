@@ -1,13 +1,13 @@
 import request from "../utils/fetchWrapper";
 
 export const getDashboardSummary = async () => {
-    return request("/api/dashboard/summary");
+    return request("/dashboard/summary");
 };
 
 export const getTasksPerUser = async () => {
-    return request("/api/dashboard/tasks-per-user");
+    return request("/dashboard/tasks-per-user");
 };
 
 export const getOverdueTasks = async () => {
-    return request("/api/dashboard/overdue");
+    return request("/dashboard/overdue");
 };

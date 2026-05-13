@@ -29,7 +29,7 @@ const isProjectAdmin = async (req, res, next) => {
 
             return res.status(403).json({
                 success: false,
-                message: "Admin access required"
+                message: `Invalid role: ${membership.role}. ADMIN role is required for this route.`
             });
         }
 

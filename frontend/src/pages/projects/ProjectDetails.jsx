@@ -4,20 +4,28 @@ import { useParams } from "react-router-dom";
 import { projectService } from "../../services/project.service";
 import { taskService } from "../../services/task.service";
 import AddMemberModal from "./AddMemberModal";
+import MainLayout
+from "../../components/layout/MainLayout";
+
 import CreateTaskModal
-from "./CreateTaskModal";
+  from "./CreateTaskModal";
 
 const ProjectDetails = () => {
   const { id } = useParams();
+  const currentUser = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
 
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [showTaskModal, setShowTaskModal] =
-  useState(false);
+    useState(false);
 
   const [loading, setLoading] = useState(true);
   const [showMemberModal, setShowMemberModal] =
-  useState(false);
+    useState(false);
+  const [memberActionMessage, setMemberActionMessage] =
+    useState("");
 
   useEffect(() => {
     fetchProjectDetails();
@@ -27,14 +35,47 @@ const ProjectDetails = () => {
     try {
       setLoading(true);
 
-      const projectData =
-        await projectService.getProjectById(id);
+      const [
+        projectResponse,
+        taskResponse,
+        membersResponse
+      ] = await Promise.all([
+        projectService.getProjectById(id),
+        taskService.getTasks(id),
+        projectService.getMembers(id)
+      ]);
 
-      const taskData =
-        await taskService.getTasks(id);
+      const project =
+        projectResponse?.data ||
+        projectResponse?.project ||
+        null;
 
-      setProject(projectData.project);
-      setTasks(taskData.tasks || []);
+      const tasks =
+        taskResponse?.data ||
+        taskResponse?.tasks ||
+        [];
+
+      const members =
+        membersResponse?.data ||
+        membersResponse?.members ||
+        [];
+
+      const normalizedMembers = Array.isArray(members)
+        ? members.map((member) => ({
+          ...member,
+          user: member.user || member.User || null
+        }))
+        : [];
+
+      setProject(
+        project
+          ? {
+            ...project,
+            members: normalizedMembers
+          }
+          : null
+      );
+      setTasks(Array.isArray(tasks) ? tasks : []);
 
     } catch (error) {
       console.error(error);
@@ -59,57 +100,86 @@ const ProjectDetails = () => {
     );
   }
   async function handleRemoveMember(
-  memberId
-) {
-  try {
+    memberId
+  ) {
+    try {
 
-    await projectService.removeMember(
-      id,
-      memberId
+      const response = await projectService.removeMember(
+        id,
+        memberId
+      );
+
+      await fetchProjectDetails();
+
+      setMemberActionMessage(
+        response?.message || "Member removed successfully"
+      );
+
+      setTimeout(() => {
+        setMemberActionMessage("");
+      }, 2500);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function handleMemberAdded(message) {
+    await fetchProjectDetails();
+    setShowMemberModal(false);
+    setMemberActionMessage(
+      message || "Member added successfully"
     );
 
-    fetchProjectDetails();
-
-  } catch (error) {
-    console.error(error);
+    setTimeout(() => {
+      setMemberActionMessage("");
+    }, 2500);
   }
-}
 
-async function handleDeleteTask(
-  taskId
-) {
-  try {
+  async function handleDeleteTask(
+    taskId
+  ) {
+    try {
 
-    await taskService.deleteTask(
-      taskId
+      await taskService.deleteTask(
+        taskId
+      );
+
+      fetchProjectDetails();
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function handleStatusChange(
+    taskId,
+    status
+  ) {
+    try {
+
+      await taskService.updateTask(
+        taskId,
+        { status }
+      );
+
+      fetchProjectDetails();
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const isProjectAdmin =
+    !!project?.members?.find(
+      (member) =>
+        (member.userId || member.user?.id || member.User?.id) ===
+        currentUser?.id &&
+        member.role === "ADMIN"
     );
-
-    fetchProjectDetails();
-
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function handleStatusChange(
-  taskId,
-  status
-) {
-  try {
-
-    await taskService.updateTask(
-      taskId,
-      { status }
-    );
-
-    fetchProjectDetails();
-
-  } catch (error) {
-    console.error(error);
-  }
-}
 
   return (
+     <MainLayout>
     <div className="project-details-page">
 
       {/* Project Header */}
@@ -134,15 +204,33 @@ async function handleStatusChange(
         <div className="section-header">
           <h2>Members</h2>
 
-          <button
-  className="create-btn"
-  onClick={() =>
-    setShowMemberModal(true)
-  }
->
-  + Add Member
-</button>
+          {isProjectAdmin && (
+            <button
+              className="create-btn"
+              onClick={() =>
+                setShowMemberModal(true)
+              }
+            >
+              + Add Member
+            </button>
+          )}
         </div>
+
+        {memberActionMessage && (
+          <div
+            style={{
+              marginBottom: "14px",
+              background: "#ecfdf3",
+              color: "#166534",
+              border: "1px solid #bbf7d0",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              fontWeight: 600
+            }}
+          >
+            {memberActionMessage}
+          </div>
+        )}
 
         <div className="members-list">
 
@@ -153,22 +241,29 @@ async function handleStatusChange(
                 className="member-card"
               >
                 <div>
-                  <h4>{member.user?.name}</h4>
+                  <h4>{member.user?.name || member.User?.name}</h4>
 
-                  <p>{member.user?.email}</p>
+                  <p>{member.user?.email || member.User?.email}</p>
                 </div>
 
                 <span className="role-badge">
                   {member.role}
                 </span>
-                <button
-  className="delete-btn"
-  onClick={() =>
-    handleRemoveMember(member.id)
-  }
->
-  Remove
-</button>
+                {isProjectAdmin && (
+                  <button
+                    className="delete-btn"
+                    onClick={() =>
+                      handleRemoveMember(
+                        member.userId ||
+                        member.user?.id ||
+                        member.User?.id ||
+                        member.id
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             ))
           ) : (
@@ -178,16 +273,14 @@ async function handleStatusChange(
         </div>
 
         {showMemberModal && (
-  <AddMemberModal
-    projectId={id}
-    onClose={() =>
-      setShowMemberModal(false)
-    }
-    onMemberAdded={
-      fetchProjectDetails
-    }
-  />
-)}
+          <AddMemberModal
+            projectId={id}
+            onClose={() =>
+              setShowMemberModal(false)
+            }
+            onMemberAdded={handleMemberAdded}
+          />
+        )}
       </div>
 
       {/* Tasks Section */}
@@ -200,11 +293,11 @@ async function handleStatusChange(
           <button
             className="create-btn"
             onClick={() =>
-                setShowTaskModal(true)
+              setShowTaskModal(true)
             }
-            >
+          >
             + Create Task
-        </button>
+          </button>
         </div>
 
         <div className="tasks-list">
@@ -233,37 +326,37 @@ async function handleStatusChange(
                   <span className="status-badge">
                     {task.status}
                   </span>
-                        <button
-                        className="delete-btn"
-                        onClick={() =>
-                            handleDeleteTask(task.id)
-                        }
-                        >
-                        Delete
-                        </button>
-                        <select
-  value={task.status}
-  onChange={(e) =>
-    handleStatusChange(
-      task.id,
-      e.target.value
-    )
-  }
->
+                  <button
+                    className="delete-btn"
+                    onClick={() =>
+                      handleDeleteTask(task.id)
+                    }
+                  >
+                    Delete
+                  </button>
+                  <select
+                    value={task.status}
+                    onChange={(e) =>
+                      handleStatusChange(
+                        task.id,
+                        e.target.value
+                      )
+                    }
+                  >
 
-  <option value="TODO">
-    TODO
-  </option>
+                    <option value="TODO">
+                      TODO
+                    </option>
 
-  <option value="IN_PROGRESS">
-    IN_PROGRESS
-  </option>
+                    <option value="IN_PROGRESS">
+                      IN_PROGRESS
+                    </option>
 
-  <option value="DONE">
-    DONE
-  </option>
+                    <option value="DONE">
+                      DONE
+                    </option>
 
-</select>
+                  </select>
                 </div>
               </div>
             ))
@@ -272,22 +365,23 @@ async function handleStatusChange(
           )}
 
           {showTaskModal && (
-  <CreateTaskModal
-    projectId={id}
-    members={project.members || []}
-    onClose={() =>
-      setShowTaskModal(false)
-    }
-    onTaskCreated={
-      fetchProjectDetails
-    }
-  />
-)}
+            <CreateTaskModal
+              projectId={id}
+              members={project.members || []}
+              onClose={() =>
+                setShowTaskModal(false)
+              }
+              onTaskCreated={
+                fetchProjectDetails
+              }
+            />
+          )}
 
         </div>
       </div>
 
     </div>
+    </MainLayout>
   );
 };
 

@@ -19,6 +19,12 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
 
+        {/* Default Route */}
+        <Route
+          path="/"
+          element={<Navigate to="/login" />}
+        />
+
         {/* Public Routes */}
 
         <Route
@@ -35,12 +41,12 @@ const AppRoutes = () => {
         {/* Protected Routes */}
 
         <Route element={<ProtectedRoute />}>
-                <Route
-                    path="/projects/:id"
-                    element={
-                        <ProjectDetails />
-                    }
-                />
+          <Route
+            path="/projects/:id"
+            element={
+              <ProjectDetails />
+            }
+          />
           <Route
             path="/dashboard"
             element={<Dashboard />}

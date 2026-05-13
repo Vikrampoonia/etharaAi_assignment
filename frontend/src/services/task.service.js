@@ -1,7 +1,6 @@
-import fetchWrapper  from "../utils/fetchWrapper";
+import fetchWrapper from "../utils/fetchWrapper";
 
-const BASE_URL =
-  `${process.env.REACT_APP_API_URL}/api`;
+const BASE_URL = "/task";
 
 export const taskService = {
   getTasks,
