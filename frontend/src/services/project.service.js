@@ -43,8 +43,18 @@ async function deleteProject(projectId) {
   });
 }
 
-async function getMembers(projectId) {
-  return fetchWrapper(`${BASE_URL}/${projectId}/members`);
+async function getMembers(
+  projectId,
+  { page = 1, limit = 10 } = {}
+) {
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  }).toString();
+
+  return fetchWrapper(
+    `${BASE_URL}/${projectId}/members?${query}`
+  );
 }
 
 async function addMember(projectId, data) {

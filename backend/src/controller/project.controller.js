@@ -219,9 +219,16 @@ class ProjectController {
         try {
 
             const { projectId } = req.params;
+            const page = Number.parseInt(req.query.page, 10) || 1;
+            const limit = Number.parseInt(req.query.limit, 10) || 10;
 
             const data = await ProjectService.getMembers(
-                projectId
+                {
+                    projectId,
+                    page: Math.max(1, page),
+                    limit: Math.max(1, limit),
+                    userId: req.user.id
+                }
             );
 
             return ResponseHandler.success(

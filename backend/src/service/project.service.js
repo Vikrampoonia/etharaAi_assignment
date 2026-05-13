@@ -59,26 +59,64 @@ class ProjectService {
         return true;
     }
 
-    async getMembers(projectId) {
-        const members =
-            await ProjectMember.findAll({
-                where: { projectId },
-                include: [
-                    {
-                        model: User,
-                        attributes: [
-                            "id",
-                            "name",
-                            "email"
-                        ]
-                    }
-                ]
-            });
+    async getMembers({
+        projectId,
+        page = 1,
+        limit = 10,
+        userId
+    }) {
+        const offset = (page - 1) * limit;
 
-        return members;
+        const {
+            rows,
+            count
+        } = await ProjectMember.findAndCountAll({
+            where: { projectId },
+            include: [
+                {
+                    model: User,
+                    attributes: [
+                        "id",
+                        "name",
+                        "email"
+                    ]
+                }
+            ],
+            order: [["createdAt", "DESC"]],
+            limit,
+            offset
+        });
+
+        const currentUserMembership =
+            userId
+                ? await ProjectMember.findOne({
+                    where: {
+                        projectId,
+                        userId
+                    },
+                    attributes: ["role"]
+                })
+                : null;
+
+        const totalPages =
+            count === 0
+                ? 1
+                : Math.ceil(count / limit);
+
+        return {
+            members: rows,
+            pagination: {
+                page,
+                limit,
+                total: count,
+                totalPages
+            },
+            isCurrentUserAdmin:
+                currentUserMembership?.role === "ADMIN"
+        };
     }
 
-    
+
     async createProject({
         name,
         description,
