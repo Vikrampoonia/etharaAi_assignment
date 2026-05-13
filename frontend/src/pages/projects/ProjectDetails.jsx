@@ -35,6 +35,7 @@ const ProjectDetails = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
   const [filterAssignee, setFilterAssignee] = useState("");
+  const [taskTitleInput, setTaskTitleInput] = useState("");
   const [filterTitle, setFilterTitle] = useState("");
   const [members, setMembers] = useState([]);
   const [showTaskModal, setShowTaskModal] =
@@ -51,6 +52,12 @@ const ProjectDetails = () => {
     useState("members");
   const [memberPage, setMemberPage] =
     useState(1);
+  const [memberSearchInput, setMemberSearchInput] =
+    useState("");
+  const [memberSearch, setMemberSearch] =
+    useState("");
+  const [memberRole, setMemberRole] =
+    useState("");
   const [memberPagination, setMemberPagination] =
     useState({
       page: 1,
@@ -118,7 +125,9 @@ const ProjectDetails = () => {
             id,
             {
               page: targetPage,
-              limit: MEMBER_PAGE_SIZE
+              limit: MEMBER_PAGE_SIZE,
+              search: memberSearch || undefined,
+              role: memberRole || undefined
             }
           );
 
@@ -172,13 +181,31 @@ const ProjectDetails = () => {
         setMembersLoading(false);
       }
     },
-    [id, memberPage]
+    [id, memberPage, memberSearch, memberRole]
   );
 
   useEffect(() => {
     setMemberPage(1);
     fetchProjectAndTasks();
   }, [id, fetchProjectAndTasks]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setFilterTitle(taskTitleInput.trim());
+      setTaskPage(1);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [taskTitleInput]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setMemberSearch(memberSearchInput.trim());
+      setMemberPage(1);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [memberSearchInput]);
 
   useEffect(() => {
     fetchMembers(memberPage);
@@ -385,6 +412,46 @@ const ProjectDetails = () => {
               </div>
             )}
 
+            <div
+              className="tasks-filters"
+              style={{ margin: "0 0 12px", display: "flex", gap: "8px", alignItems: "center", background: "#fff", padding: "8px", borderRadius: 8, border: "1px solid #e6e6e6" }}
+            >
+              <input
+                type="text"
+                placeholder="Search name or email"
+                value={memberSearchInput}
+                onChange={(e) => {
+                  setMemberSearchInput(e.target.value);
+                }}
+                style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #d1d5db", minWidth: 220 }}
+              />
+
+              <select
+                value={memberRole}
+                onChange={(e) => {
+                  setMemberRole(e.target.value);
+                  setMemberPage(1);
+                }}
+                style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #d1d5db", minWidth: 140 }}
+              >
+                <option value="">All Roles</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="MEMBER">MEMBER</option>
+              </select>
+
+              <button
+                onClick={() => {
+                  setMemberSearchInput("");
+                  setMemberSearch("");
+                  setMemberRole("");
+                  setMemberPage(1);
+                }}
+                style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#fff" }}
+              >
+                Clear
+              </button>
+            </div>
+
             <div className="members-table-wrap">
               <table className="members-table">
                 <thead>
@@ -531,8 +598,8 @@ const ProjectDetails = () => {
                 <input
                   type="text"
                   placeholder="Search task name"
-                  value={filterTitle}
-                  onChange={(e) => { setFilterTitle(e.target.value); setTaskPage(1); }}
+                  value={taskTitleInput}
+                  onChange={(e) => { setTaskTitleInput(e.target.value); }}
                   style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #d1d5db", minWidth: 220 }}
                 />
 
@@ -579,7 +646,7 @@ const ProjectDetails = () => {
                   <option value="HIGH">HIGH</option>
                 </select>
 
-                <button onClick={() => { setFilterAssignee(""); setFilterPriority(""); setFilterStatus(""); setFilterTitle(""); setTaskPage(1); }} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#fff", marginLeft: 6 }}>Clear</button>
+                <button onClick={() => { setFilterAssignee(""); setFilterPriority(""); setFilterStatus(""); setTaskTitleInput(""); setFilterTitle(""); setTaskPage(1); }} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e5e7eb", background: "#fff", marginLeft: 6 }}>Clear</button>
               </div>
 
               {tasks.length > 0 ? (

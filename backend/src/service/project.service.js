@@ -3,6 +3,7 @@ import {
     ProjectMember,
     User
 } from "../modals/index.js";
+import { Op } from "sequelize";
 
 
 class ProjectService {
@@ -63,24 +64,44 @@ class ProjectService {
         projectId,
         page = 1,
         limit = 10,
-        userId
+        userId,
+        search = "",
+        role = ""
     }) {
         const offset = (page - 1) * limit;
+
+        const memberWhere = { projectId };
+        if (role) {
+            memberWhere.role = role;
+        }
+
+        const includeUser = {
+            model: User,
+            attributes: [
+                "id",
+                "name",
+                "email"
+            ]
+        };
+
+        if (search && search.trim()) {
+            const term = search.trim();
+            includeUser.where = {
+                [Op.or]: [
+                    { name: { [Op.iLike]: `%${term}%` } },
+                    { email: { [Op.iLike]: `%${term}%` } }
+                ]
+            };
+            includeUser.required = true;
+        }
 
         const {
             rows,
             count
         } = await ProjectMember.findAndCountAll({
-            where: { projectId },
+            where: memberWhere,
             include: [
-                {
-                    model: User,
-                    attributes: [
-                        "id",
-                        "name",
-                        "email"
-                    ]
-                }
+                includeUser
             ],
             order: [["createdAt", "DESC"]],
             limit,

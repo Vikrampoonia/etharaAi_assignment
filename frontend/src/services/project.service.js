@@ -55,12 +55,22 @@ async function deleteProject(projectId) {
 
 async function getMembers(
   projectId,
-  { page = 1, limit = 10 } = {}
+  { page = 1, limit = 10, search = "", role = "" } = {}
 ) {
-  const query = new URLSearchParams({
+  const queryObj = {
     page: String(page),
     limit: String(limit),
-  }).toString();
+  };
+
+  if (search) {
+    queryObj.search = String(search);
+  }
+
+  if (role) {
+    queryObj.role = String(role);
+  }
+
+  const query = new URLSearchParams(queryObj).toString();
 
   return fetchWrapper(
     `${BASE_URL}/${projectId}/members?${query}`

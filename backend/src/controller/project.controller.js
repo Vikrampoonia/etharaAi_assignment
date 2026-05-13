@@ -221,13 +221,19 @@ class ProjectController {
             const { projectId } = req.params;
             const page = Number.parseInt(req.query.page, 10) || 1;
             const limit = Number.parseInt(req.query.limit, 10) || 10;
+            const search = (req.query.search || "").trim();
+            const role = req.query.role === "ADMIN" || req.query.role === "MEMBER"
+                ? req.query.role
+                : "";
 
             const data = await ProjectService.getMembers(
                 {
                     projectId,
                     page: Math.max(1, page),
                     limit: Math.max(1, limit),
-                    userId: req.user.id
+                    userId: req.user.id,
+                    search,
+                    role
                 }
             );
 
