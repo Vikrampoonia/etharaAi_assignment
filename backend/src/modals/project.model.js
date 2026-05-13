@@ -17,7 +17,11 @@ const Project = sequelize.define(
 
     description: {
       type: DataTypes.TEXT
-    }
+    },
+    createdBy: {
+    type: DataTypes.UUID,
+    allowNull: false
+}
   },
   {
     timestamps: true

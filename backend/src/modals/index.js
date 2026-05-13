@@ -19,6 +19,21 @@ Project.belongsToMany(User, {
   foreignKey: "projectId"
 });
 
+ProjectMember.belongsTo(User, {
+    foreignKey: "userId"
+});
+
+User.hasMany(ProjectMember, {
+    foreignKey: "userId"
+});
+
+ProjectMember.belongsTo(Project, {
+    foreignKey: "projectId"
+});
+
+Project.hasMany(ProjectMember, {
+    foreignKey: "projectId"
+});
 
 /*
 |--------------------------------------------------------------------------

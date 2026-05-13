@@ -35,7 +35,11 @@ const Task = sequelize.define(
         "DONE"
       ),
       defaultValue: "TODO"
-    }
+    },
+    createdBy: {
+    type: DataTypes.UUID,
+    allowNull: false
+}
   },
   {
     timestamps: true

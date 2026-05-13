@@ -2,7 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
-// import authRouter from "./router/authRouter.js";
+import authRoutes from "./routes/auth.routes.js";
+import projectRoutes from "./routes/project.routes.js";
+import taskRoutes from "./routes/task.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 import { connectDB, sequelize } from './config/db.js';
 import Result from './constant/result.js';
 import './modals/index.js';
@@ -73,7 +76,11 @@ app.get("/drop-tables", async (req,res) => {
   }
 })
 
-// app.use("/api/auth", authRouter);
+app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/task", taskRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
