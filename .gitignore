@@ -1,4 +1,18 @@
-/backend/node_modules
-/backend/.env
-/frontend/node_modules
-/frontend/.env
+# dependencies
+node_modules/
+
+# env files
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# build folders
+dist
+build
+
+# OS files
+.DS_Store
+Thumbs.db
