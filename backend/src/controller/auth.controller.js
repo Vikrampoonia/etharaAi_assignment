@@ -1,11 +1,11 @@
-import AuthService from "../services/auth.service.js";
+import AuthService from "../service/auth.service.js";
 
 import ResponseHandler from "../utils/response.js";
 
 import {
     validateSignup,
     validateLogin
-} from "../validations/auth.validation.js";
+} from "../validation/auth.validation.js";
 
 
 
@@ -97,4 +97,4 @@ class AuthController {
     }
 }
 
-export default AuthController;
+export default new AuthController;

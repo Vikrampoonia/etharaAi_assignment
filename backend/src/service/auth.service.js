@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/index.js";
+import { User } from "../modals/index.js";
 import { generateToken } from "../utils/jwt.js";
 
 class AuthService {
@@ -72,4 +72,4 @@ class AuthService {
     }
 }
 
-export default AuthService;
+export default  new AuthService;

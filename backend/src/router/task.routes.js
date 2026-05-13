@@ -1,7 +1,7 @@
 import express from "express";
 
 import TaskController
-from "../controllers/task.controller.js";
+from "../controller/task.controller.js";
 
 import verifyJWT
 from "../middleware/auth.middleware.js";

@@ -1,4 +1,4 @@
-import { ProjectMember } from "../models/index.js";
+import { ProjectMember } from "../modals/index.js";
 
 
 

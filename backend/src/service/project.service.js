@@ -2,7 +2,7 @@ import {
     Project,
     ProjectMember,
     User
-} from "../models/index.js";
+} from "../modals/index.js";
 
 
 class ProjectService {
@@ -166,4 +166,4 @@ class ProjectService {
 
 }
 
-export default ProjectService;
+export default new ProjectService;

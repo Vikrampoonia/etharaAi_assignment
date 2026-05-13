@@ -1,4 +1,4 @@
-import DashboardService from "../services/dashboard.service.js";
+import DashboardService from "../service/dashboard.service.js";
 
 import ResponseHandler from "../utils/response.js";
 
@@ -95,4 +95,4 @@ class DashboardController {
     }
 }
 
-export default DashboardController;
+export default new DashboardController;

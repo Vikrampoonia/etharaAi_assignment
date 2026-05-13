@@ -1,5 +1,5 @@
 import express from "express";
-import ProjectController from "../controllers/auth.controller.js";
+import ProjectController from "../controller/project.controller.js";
 import verifyJWT from "../middleware/auth.middleware.js";
 import isProjectAdmin from "../middleware/projectAdmin.middleware.js";
 

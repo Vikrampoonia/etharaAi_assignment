@@ -1,8 +1,8 @@
-import TaskService from "../services/task.service.js";
+import TaskService from "../service/task.service.js";
 import ResponseHandler from "../utils/response.js";
 import {
     validateTask
-} from "../validations/task.validation.js";
+} from "../validation/task.validation.js";
 
 
 
@@ -179,4 +179,4 @@ class TaskController {
     }
 }
 
-export default TaskController;
+export default new TaskController;

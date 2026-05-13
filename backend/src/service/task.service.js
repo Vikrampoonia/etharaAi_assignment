@@ -2,7 +2,7 @@ import {
     Task,
     User,
     ProjectMember
-} from "../models/index.js";
+} from "../modals/index.js";
 
 
 
@@ -216,4 +216,4 @@ class TaskService {
     }
 }
 
-export default TaskService;
+export default new TaskService;

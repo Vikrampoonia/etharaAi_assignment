@@ -1,7 +1,7 @@
 import express from "express";
 
 import DashboardController
-from "../controllers/dashboard.controller.js";
+from "../controller/dashboard.controller.js";
 
 import verifyJWT
 from "../middleware/auth.middleware.js";

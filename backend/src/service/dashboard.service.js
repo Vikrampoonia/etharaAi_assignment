@@ -2,7 +2,7 @@ import {
     Task,
     ProjectMember,
     User
-} from "../models/index.js";
+} from "../modals/index.js";
 
 import { Op } from "sequelize";
 
@@ -288,4 +288,4 @@ class DashboardService {
     }
 }
 
-export default DashboardService;
+export default new DashboardService;

@@ -1,10 +1,10 @@
-import ProjectService from "../services/project.service.js";
+import ProjectService from "../service/project.service.js";
 
 import ResponseHandler from "../utils/response.js";
 
 import {
     validateProject
-} from "../validations/project.validation.js";
+} from "../validation/project.validation.js";
 
 
 class ProjectController {
@@ -240,5 +240,5 @@ class ProjectController {
     }
 }
 
-export default ProjectController;
+export default new ProjectController;
 
