@@ -7,14 +7,7 @@ import {
 import { Op } from "sequelize";
 
 
-
-
-
 class TaskService {
-
-
-
-
 
     async createTask({
         projectId,
@@ -30,37 +23,18 @@ class TaskService {
             assignedTo
         } = taskData;
 
-
-
-
-
         const task = await Task.create({
-
             title,
-
             description,
-
             dueDate,
-
             priority,
-
             assignedTo,
-
             createdBy,
-
             projectId
         });
 
-
-
-
-
         return task;
     }
-
-
-
-
 
 
     async getTasks(projectId, options = {}) {
@@ -117,10 +91,6 @@ class TaskService {
     }
 
 
-
-
-
-
     async getSingleTask(taskId) {
 
         const task = await Task.findByPk(taskId, {
@@ -146,10 +116,6 @@ class TaskService {
     }
 
 
-
-
-
-
     async updateTask({
         taskId,
         user,
@@ -164,10 +130,6 @@ class TaskService {
         }
 
 
-
-
-
-
         const membership =
             await ProjectMember.findOne({
 
@@ -180,10 +142,6 @@ class TaskService {
         if (!membership) {
             throw new Error("Access denied");
         }
-
-
-
-
 
 
         /*
@@ -212,9 +170,6 @@ class TaskService {
 
             return task;
         }
-
-
-
 
 
 
@@ -248,10 +203,6 @@ class TaskService {
 
         return task;
     }
-
-
-
-
 
 
     async deleteTask(taskId, user) {

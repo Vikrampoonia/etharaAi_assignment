@@ -12,9 +12,6 @@ from "../middleware/projectAdmin.middleware.js";
 const router = express.Router();
 
 
-
-
-
 router.post(
     "/projects/:projectId/tasks",
     verifyJWT,
@@ -32,19 +29,11 @@ router.get(
     TaskController.getTasks
 );
 
-
-
-
-
 router.get(
     "/tasks/:taskId",
     verifyJWT,
     TaskController.getSingleTask
 );
-
-
-
-
 
 router.put(
     "/tasks/:taskId",
@@ -52,18 +41,10 @@ router.put(
     TaskController.updateTask
 );
 
-
-
-
-
 router.delete(
     "/tasks/:taskId",
     verifyJWT,
     TaskController.deleteTask
 );
-
-
-
-
 
 export default router;

@@ -15,12 +15,7 @@ class Constants {
             serviceUnavailable: 503,
             modified: 302,
         };
-
-        this.roles = {
-            supplier: "Supplier",
-            admin: "Admin"
-        };
-
+        
         this.auctionStatus = {
             active: "Active",
             closed: "Closed",

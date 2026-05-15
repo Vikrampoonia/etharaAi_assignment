@@ -11,7 +11,6 @@ import {
 
 class AuthController {
 
-
     async signup(req, res) {
 
         try {

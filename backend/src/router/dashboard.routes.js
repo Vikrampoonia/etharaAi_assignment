@@ -9,18 +9,11 @@ from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 
-
-
-
 router.get(
     "/summary",
     verifyJWT,
     DashboardController.getSummary
 );
-
-
-
-
 
 router.get(
     "/tasks-per-user",
@@ -28,18 +21,10 @@ router.get(
     DashboardController.getTasksPerUser
 );
 
-
-
-
-
 router.get(
     "/overdue",
     verifyJWT,
     DashboardController.getOverdueTasks
 );
-
-
-
-
 
 export default router;

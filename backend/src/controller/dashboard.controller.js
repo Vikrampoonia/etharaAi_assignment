@@ -2,15 +2,7 @@ import DashboardService from "../service/dashboard.service.js";
 
 import ResponseHandler from "../utils/response.js";
 
-
-
-
-
 class DashboardController {
-
-
-
-
 
     async getSummary(req, res) {
 
@@ -37,10 +29,6 @@ class DashboardController {
     }
 
 
-
-
-
-
     async getTasksPerUser(req, res) {
 
         try {
@@ -64,10 +52,6 @@ class DashboardController {
             );
         }
     }
-
-
-
-
 
 
     async getOverdueTasks(req, res) {
